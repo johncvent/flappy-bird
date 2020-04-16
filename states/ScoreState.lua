@@ -9,6 +9,9 @@
 ]]
 
 ScoreState = Class{__includes = BaseState}
+local GOLD_MEDAL_IMAGE = love.graphics.newImage('goldmedal.png')
+local SILVER_MEDAL_IMAGE = love.graphics.newImage('silvermedal.png')
+local BRONZE_MEDAL_IMAGE = love.graphics.newImage('bronzemedal.png')
 
 --[[
     When we enter the score state, we expect to receive the score
@@ -27,6 +30,15 @@ end
 
 function ScoreState:render()
     -- simply render the score to the middle of the screen
+    --love.graphics.draw(BRONZE_MEDAL_IMAGE, 200, 20)
+    if self.score >= 10 then
+        love.graphics.draw(GOLD_MEDAL_IMAGE, VIRTUAL_WIDTH/2 - GOLD_MEDAL_IMAGE:getWidth()/2, VIRTUAL_HEIGHT/2 - GOLD_MEDAL_IMAGE:getHeight()/2)
+    elseif self.score >= 5 then
+        love.graphics.draw(SILVER_MEDAL_IMAGE, VIRTUAL_WIDTH/2 - GOLD_MEDAL_IMAGE:getWidth()/2, VIRTUAL_HEIGHT/2 - GOLD_MEDAL_IMAGE:getHeight()/2)
+    else
+        love.graphics.draw(BRONZE_MEDAL_IMAGE, VIRTUAL_WIDTH/2 - GOLD_MEDAL_IMAGE:getWidth()/2, VIRTUAL_HEIGHT/2 - GOLD_MEDAL_IMAGE:getHeight()/2)
+    end    
+
     love.graphics.setFont(flappyFont)
     love.graphics.printf('Oof! You lost!', 0, 64, VIRTUAL_WIDTH, 'center')
 
