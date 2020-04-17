@@ -43,6 +43,10 @@ require 'Bird'
 require 'Pipe'
 require 'PipePair'
 
+-- keep track of screen pause status
+local pause = false
+local pause_icon = love.graphics.newImage('pauseicon.png')
+
 -- physical screen dimensions
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -87,7 +91,8 @@ function love.load()
         ['score'] = love.audio.newSource('score.wav', 'static'),
 
         -- https://freesound.org/people/xsgianni/sounds/388079/
-        ['music'] = love.audio.newSource('marios_way.mp3', 'static')
+        ['music'] = love.audio.newSource('marios_way.mp3', 'static'),
+        ['pause'] = love.audio.newSource('pause_beep.wav', 'static')
     }
 
     -- kick off music
@@ -154,12 +159,24 @@ function love.mouse.wasPressed(button)
 end
 
 function love.update(dt)
-    -- scroll our background and ground, looping back to 0 after a certain amount
-    backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
-    groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt) % VIRTUAL_WIDTH
+    if love.keyboard.wasPressed('p') and pause == false then
+        pause = true
+        love.audio.pause(sounds['music'])
+        --sounds['music']:stop()
+        sounds['pause']:play()
+    elseif love.keyboard.wasPressed('p') and pause == true then
+        pause = false
+        sounds['pause']:play()
+        love.audio.resume(sounds['music'])
+        --sounds['music']:play()
+    end
 
-    gStateMachine:update(dt)
-
+    if pause == false then
+        -- scroll our background and ground, looping back to 0 after a certain amount
+        backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
+        groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt) % VIRTUAL_WIDTH
+        gStateMachine:update(dt)
+    end
     love.keyboard.keysPressed = {}
     love.mouse.buttonsPressed = {}
 end
@@ -170,6 +187,9 @@ function love.draw()
     love.graphics.draw(background, -backgroundScroll, 0)
     gStateMachine:render()
     love.graphics.draw(ground, -groundScroll, VIRTUAL_HEIGHT - 16)
+    if pause == true then
+        love.graphics.draw(pause_icon, VIRTUAL_WIDTH/2 - pause_icon:getWidth()/2, VIRTUAL_HEIGHT/2 - pause_icon:getHeight()/2)
+    end
     
     push:finish()
 end
